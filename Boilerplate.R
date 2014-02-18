@@ -20,12 +20,34 @@ summary(my.df)
 names(my.df)
 class(my.df)
 sapply(my.df[1,],class)
+str(my.df) #number of observations, number of vars, class of variables
 head(my.df, 20)
 
 ### Clean and Transorm your Data ###
 # I often need to transorm data that is stored as factor or character to numeric
 # For example, if there is a "?" in one cell, it will be stored as non numeric
-my.df$col2Numeric <- as.numeric(as.character(my.df$col2)) # Transforms
+my.df$col2Numeric <- as.numeric(my.df$col2) # Transforms to numeric
+
+# Missing Values
+missing <- is.na(my.df$col1) 
+sum(missing) #Number of missing values
+sum(!missing) #Number of non-missing values
+
+#OR
+good <- complete.cases(my.df$col1)
+sum(!good) #Number of missing values
+sum(good) #Number of non-missing values
+
+# Dropping (removing)
+remove(good) #object
+remove(my.df) #dataframe
+
+# To drop variable/column:
+my.df$col1 <- NULL #column OR
+my.df <- subset(my.df, select = -c(col1)) #OR
+
+# To drop observations with a given value:
+my.df <- subset(my.df, col3 %in% c("a","b"))
 
 # I usually make a "1" column to make tabulations easier
 my.df$Tab <- 1
@@ -47,9 +69,15 @@ my.df$Season <- ifelse((my.df$Month >= 3) & (my.df$Month <= 5), "Spring",
 
 # How to switch from Excel: the pivot table
 aggregate(col1 ~ col4, my.df, mean ) # makes a two-way table
+
 # aggregate works for a couple of variables. 
 # "Cast" from reshape2 works when you have more than two variables:
-# http://www.r-bloggers.com/pivot-tables-in-r/
+# http://marcoghislanzoni.com/blog/2013/10/11/pivot-tables-in-r-with-melt-and-cast/
 library(reshape2)
-dcast(my.df, col4 ~ col1 + col3)
+data.m <- melt(my.df, id=c(3:4), measure=c(2,5)) # id = non-numeric; measure = numeric
+data.c <- cast(data.m, col4 ~ variable, sum)
+
+# Export
+write.csv(my.df, file = "mydf.csv")
+
 
