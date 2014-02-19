@@ -75,9 +75,52 @@ aggregate(col1 ~ col4, my.df, mean ) # makes a two-way table
 # http://marcoghislanzoni.com/blog/2013/10/11/pivot-tables-in-r-with-melt-and-cast/
 library(reshape2)
 data.m <- melt(my.df, id=c(3:4), measure=c(2,5)) # id = non-numeric; measure = numeric
-data.c <- cast(data.m, col4 ~ variable, sum)
+data.c <- dcast(data.m, col4 ~ variable, sum)
 
 # Export
 write.csv(my.df, file = "mydf.csv")
 
 
+###  Visualize ###
+library(ggplot2)
+
+my.theme <- 
+  theme(plot.background = element_blank(), # Remove background
+        panel.grid.major = element_blank(), # Remove gridlines
+        panel.grid.minor = element_blank(), # Remove more gridlines
+        panel.border = element_blank(), # Remove border
+        panel.background = element_blank(), # Remove more background
+        axis.ticks = element_blank(), # Remove axis ticks
+        axis.text=element_text(size=24), # Enlarge axis text font
+        axis.title=element_text(size=26), # Enlarge axis title font
+        plot.title=element_text(size=32, hjust=0)) # Enlarge, left-align title
+
+
+p <- qplot(Year, data=data.m, geom="bar", fill=Gender, alpha=I(.7), main="Youth Drug ODs", ylab="ODs")
+p + my.theme
+
+
+# Map it!
+# First I add a column with Somerville addresses
+my.df$Address <- sample(c("Highland AVe @ Somerville Ave", "41 Beacon St", "Weird St"), 10, replace = TRUE)
+addresses <- paste(my.df$Address, "Somerville", "MA", sep=", ")
+
+# Geocodes using the Google engine
+library(ggmap) 
+locs <- geocode(addresses)
+locs2 <- subset(locs, lat != 42.3875968 ) # Takes out the weird ones Google couldn't pin
+# I map locs2 because when Google can't find something, it usually puts it int the center of the map
+# This throws off the heat maps
+
+map.center <- geocode("Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 14)
+SHmap + geom_density2d(
+  aes(x=locs2$lon, y=locs2$lat,  
+      fill = ..level.. , alpha = ..level..),size = 1.5, bins = 26, color="red", 
+  data = locs2) 
+
+map.center <- geocode("Highland Ave @ School St Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 13)
+SHmap + geom_point(
+  aes(x=locs2$lon, y=locs2$lat),size = 10, alpha = .7, bins = 26, color="red", 
+  data = locs2) 
