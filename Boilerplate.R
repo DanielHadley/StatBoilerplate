@@ -26,7 +26,14 @@ head(my.df, 20)
 ### Clean and Transorm your Data ###
 # I often need to transorm data that is stored as factor or character to numeric
 # For example, if there is a "?" in one cell, it will be stored as non numeric
-my.df$col2Numeric <- as.numeric(my.df$col2) # Transforms to numeric
+my.df$col2Numeric <- as.numeric(as.character(my.df$col2)) # Transforms to numeric
+
+# Sometimes variables stored as factors have characters that generate unexpected results when as.numeric is applied. 
+# Use gsub to remove these characters by removing them (technically, replacing them with nothing).
+# For example, use this code if your values look like this: $1,000. For more on gsub see: http://www.endmemo.com/program/R/gsub.php
+data$var.clean <- gsub("([/$,])", "", data$var)
+data$var.clean <- as.numeric(data$var) #OR, more simply
+data$var.clean <- as.numeric(gsub("([/$,])", "", data$var))
 
 # Missing Values
 missing <- is.na(my.df$col1) 
