@@ -6,9 +6,9 @@
 
 ### Loading Data  ### 
 # A nifty trick to load data from your clipboard: 
-myData <- read.delim("clipboard")
+# myData <- read.delim("clipboard")
 # Or from CSV: 
-`myData` <- read.csv("C:/mypath/forward/slashes/myData.csv")
+# `myData` <- read.csv("C:/mypath/forward/slashes/myData.csv")
 # But For this we will use randomly-generated reproduceable data 
 my.df <- data.frame(col1 = sample(c(1,2), 10, replace = TRUE),
                     col2 = as.factor(sample(10)), col3 = letters[1:10],
@@ -53,6 +53,9 @@ remove(my.df) #dataframe
 my.df$col1 <- NULL #column OR
 my.df <- subset(my.df, select = -c(col1)) #OR
 
+# To drop an observation/row
+my.df <- my.df[-917,]
+
 # To drop observations with a given value:
 my.df <- subset(my.df, col3 %in% c("a","b"))
 
@@ -81,8 +84,15 @@ aggregate(col1 ~ col4, my.df, mean ) # makes a two-way table
 # "Cast" from reshape2 works when you have more than two variables:
 # http://marcoghislanzoni.com/blog/2013/10/11/pivot-tables-in-r-with-melt-and-cast/
 library(reshape2)
+names(my.df) #look at these again to see which columns to include
 data.m <- melt(my.df, id=c(3:4), measure=c(2,5)) # id = non-numeric; measure = numeric
 data.c <- dcast(data.m, col4 ~ variable, sum)
+
+library(plyr)
+my.df <- my.df[order(-my.df$col2Numeric),] # sort it
+# just the top 2 most frequent seasons
+my.df.top <- subset(my.df, Season %in% arrange(count(my.df, .(Season)), desc(freq))[1:2,]$Season)
+
 
 # Export
 write.csv(my.df, file = "mydf.csv")
@@ -100,14 +110,16 @@ my.theme <-
         axis.ticks = element_blank(), # Remove axis ticks
         axis.text=element_text(size=24), # Enlarge axis text font
         axis.title=element_text(size=26), # Enlarge axis title font
-        plot.title=element_text(size=32, hjust=0)) # Enlarge, left-align title
+        plot.title=element_text(size=32, hjust=0) # Enlarge, left-align title
+        #,axis.text.x = element_text(angle=60, hjust = 1) # Uncomment if X-axis unreadable 
+        )
 
 
-p <- qplot(Year, data=data.m, geom="bar", fill=Gender, alpha=I(.7), main="Youth Drug ODs", ylab="ODs")
-p + my.theme
+p <- qplot(Year, data=my.df, geom="bar", fill=col4, alpha=I(.7), main="Incidents", ylab="Number of Incidents")
+p + my.theme + facet_grid(. ~ Season) # Facet grid is the perfect way to add more to your X-axis
 
 
-# Map it!
+###### Map it! ######
 # First I add a column with Somerville addresses
 my.df$Address <- sample(c("Highland AVe @ Somerville Ave", "41 Beacon St", "Weird St"), 10, replace = TRUE)
 addresses <- paste(my.df$Address, "Somerville", "MA", sep=", ")
@@ -119,6 +131,7 @@ locs2 <- subset(locs, lat != 42.3875968 ) # Takes out the weird ones Google coul
 # I map locs2 because when Google can't find something, it usually puts it int the center of the map
 # This throws off the heat maps
 
+# Contour Map
 map.center <- geocode("Somerville, MA")
 SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 14)
 SHmap + geom_density2d(
@@ -126,8 +139,20 @@ SHmap + geom_density2d(
       fill = ..level.. , alpha = ..level..),size = 1.5, bins = 26, color="red", 
   data = locs2) 
 
-map.center <- geocode("Highland Ave @ School St Somerville, MA")
-SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 13)
+# Dot map centered on Conway Park
+map.center <- geocode("Conway Park, Somerville, MA")
+SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 16)
 SHmap + geom_point(
   aes(x=locs2$lon, y=locs2$lat),size = 10, alpha = .7, bins = 26, color="red", 
   data = locs2) 
+
+# More traditional heat map
+Somerville = c(lon = -71.1000, lat =  42.3875)
+somerville.map = get_map(location = Somerville, zoom = 14, color = "bw")
+ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% locs2 + aes(x = locs2$lon, y = locs2$lat) +
+  geom_density2d(data = locs2, aes(x = lon, y = lat)) +
+  stat_density2d(data = locs2, aes(x = lon, y = lat,  fill = ..level.., alpha = ..level..),
+                 size = 0.01, bins = 16, geom = 'polygon') +
+  scale_fill_gradient(low = "green", high = "red") +
+  scale_alpha(range = c(0.00, 0.25), guide = FALSE) +
+  theme(legend.position = "none", axis.title = element_blank(), text = element_text(size = 12))
