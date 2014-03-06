@@ -1,18 +1,26 @@
 # Boilerplate R Code 
 # Created by Daniel Hadley, 2014
 # These packages are used at various points: 
-# install.packages("reshape2", )
+# install.packages("reshape2", "plyr", "ggplot2", "ggmap" )
 
 
 ### Loading Data  ### 
 # A nifty trick to load data from your clipboard: 
-# myData <- read.delim("clipboard")
+# my.df <- read.delim("clipboard")
 # Or from CSV: 
 # `myData` <- read.csv("C:/mypath/forward/slashes/myData.csv")
-# But For this we will use randomly-generated reproduceable data 
+
+# But For this we will use randomly-generated data 
 my.df <- data.frame(col1 = sample(c(1,2), 10, replace = TRUE),
                     col2 = as.factor(sample(10)), col3 = letters[1:10],
                     col4 = sample(c(TRUE, FALSE), 10, replace = TRUE))
+# I usually make a "1" column to make tabulations easier
+my.df$Tab <- 1
+# This adds a column with Somerville addresses for the mapping portion
+my.df$Address <- sample(c("Highland AVe @ Somerville Ave", "41 Beacon St", "Weird St"), 10, replace = TRUE)
+# And Finally I add a date column to the df for dat transformations
+my.df$Date <- sample(c("1/1/2013", "3/20/2013", "6/22/2014"), 10, replace = TRUE) # make column
+
 
 ### Review your Data ###
 View(my.df) 
@@ -59,12 +67,12 @@ my.df <- my.df[-917,]
 # To drop observations with a given value:
 my.df <- subset(my.df, col3 %in% c("a","b"))
 
-# I usually make a "1" column to make tabulations easier
-my.df$Tab <- 1
+# To Select an observation
+newdata <- my.df[ which(my.df$col3=='a' 
+                         | my.df$col3 == 'b'), ]
+
 
 # Date
-# Suppose you had a column with a date
-my.df$Date <- sample(c("1/1/2013", "3/20/2013", "6/22/2014"), 10, replace = TRUE) # make column
 my.df$Date <- as.Date(my.df$Date,"%m/%d/%Y") # Tell R it's a date
 my.df$Month <- format(my.df$Date, format='%m') # Break it into month, day, year...
 my.df$Day <- format(my.df$Date, format='%d')
@@ -78,15 +86,16 @@ my.df$Season <- ifelse((my.df$Month >= 3) & (my.df$Month <= 5), "Spring",
 
 
 # How to switch from Excel: the pivot table
-aggregate(col1 ~ col4, my.df, mean ) # makes a two-way table
+aggregate(col2Numeric ~ Year, my.df, sum ) # makes a two-way table
 
 # aggregate works for a couple of variables. 
 # "Cast" from reshape2 works when you have more than two variables:
 # http://marcoghislanzoni.com/blog/2013/10/11/pivot-tables-in-r-with-melt-and-cast/
 library(reshape2)
-names(my.df) #look at these again to see which columns to include
-data.m <- melt(my.df, id=c(3:4), measure=c(2,5)) # id = non-numeric; measure = numeric
-data.c <- dcast(data.m, col4 ~ variable, sum)
+sapply(my.df[1,],class) #look at these again to see which columns to include
+names(my.df) #look at the names
+data.m <- melt(my.df, id=c(2:4, 5, 9:12), measure=c(8)) # id = non-numeric; measure = numeric
+data.c <- dcast(data.m, Year ~ variable, sum)
 
 library(plyr)
 my.df <- my.df[order(-my.df$col2Numeric),] # sort it
@@ -118,10 +127,12 @@ my.theme <-
 p <- qplot(Year, data=my.df, geom="bar", fill=col4, alpha=I(.7), main="Incidents", ylab="Number of Incidents")
 p + my.theme + facet_grid(. ~ Season) # Facet grid is the perfect way to add more to your X-axis
 
+# A simple method is to use the "weight" function with qplot. This will even work with aggregate
+p <- qplot(Year, weight = col2Numeric, data = data.c, geom = "bar", alpha=I(.7), main="Data By Year", ylab="Col2 Count")
+p + my.theme
+
 
 ###### Map it! ######
-# First I add a column with Somerville addresses
-my.df$Address <- sample(c("Highland AVe @ Somerville Ave", "41 Beacon St", "Weird St"), 10, replace = TRUE)
 addresses <- paste(my.df$Address, "Somerville", "MA", sep=", ")
 
 # Geocodes using the Google engine
