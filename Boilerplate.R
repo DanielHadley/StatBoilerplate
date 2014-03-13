@@ -71,6 +71,7 @@ my.df <- subset(my.df, col3 %in% c("a","b"))
 newdata <- my.df[ which(my.df$col3=='a' 
                          | my.df$col3 == 'b'), ]
 
+# To reshape data: see: http://www.ats.ucla.edu/stat/r/faq/reshape.htm
 
 # Date
 my.df$Date <- as.Date(my.df$Date,"%m/%d/%Y") # Tell R it's a date
