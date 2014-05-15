@@ -111,6 +111,9 @@ write.csv(d, file = "mydf.csv")
 
 ###  Visualize ###
 library(ggplot2)
+library(scales) # for changing from scientific notation
+# Example scale feature: scale_y_continuous(labels = comma) or scale_y_continuous(labels = dollar)
+
 
 my.theme <- 
   theme(plot.background = element_blank(), # Remove background
@@ -131,7 +134,7 @@ p + my.theme + facet_grid(. ~ Season) # Facet grid is the perfect way to add mor
 
 # A simple method is to use the "weight" function with qplot. This will even work with aggregate
 p <- qplot(Year, weight = col2Numeric, data = data.c, geom = "bar", alpha=I(.7), main="Data By Year", ylab="Col2 Count")
-p + my.theme
+p + my.theme + scale_y_continuous(labels = comma) # scale y is not useful here, but changes from e-notation
 
 
 ###### Map it! ######
