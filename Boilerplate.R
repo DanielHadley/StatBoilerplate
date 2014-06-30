@@ -1,10 +1,10 @@
 # Boilerplate R Code 
 # Created by Daniel Hadley, 2014
 # These packages are used at various points: 
-# install.packages("reshape2", "plyr", "ggplot2", "ggmap" )
+# install.packages("reshape2", "plyr", "ggplot2", "ggmap", "scales")
 
 
-### Loading Data  ### 
+#### Loading Data  #### 
 # A nifty trick to load data from your clipboard: 
 # d <- read.delim("clipboard")
 # Or from CSV: 
@@ -24,7 +24,7 @@ d$Address <- sample(c("Highland AVe @ Somerville Ave", "41 Beacon St", "Weird St
 d$Date <- sample(c("1/1/2013", "3/20/2013", "6/22/2014"), 10, replace = TRUE) # make column
 
 
-### Review your Data ###
+#### Review your Data ####
 View(d) 
 summary(d)
 names(d)
@@ -33,7 +33,8 @@ sapply(d[1,],class)
 str(d) #number of observations, number of vars, class of variables
 head(d, 20)
 
-### Clean and Transorm your Data ###
+
+#### Clean and Transorm your Data ####
 # I often need to transorm data that is stored as factor or character to numeric
 # For example, if there is a "?" in one cell, it will be stored as non numeric
 d$col2Numeric <- as.numeric(as.character(d$col2)) # Transforms to numeric
@@ -109,7 +110,7 @@ d.top <- subset(d, Season %in% arrange(count(d, .(Season)), desc(freq))[1:2,]$Se
 write.csv(d, file = "mydf.csv")
 
 
-###  Visualize ###
+####  Visualize ####
 library(ggplot2)
 library(scales) # for changing from scientific notation
 # Example scale feature: scale_y_continuous(labels = comma) or scale_y_continuous(labels = dollar)
