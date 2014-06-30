@@ -57,7 +57,7 @@ sum(good) #Number of non-missing values
 
 # Dropping (removing)
 remove(good) #object
-remove(d) #dataframe
+remove(missing) # also works with a dataframe
 
 # To drop variable/column:
 d$col1 <- NULL #column OR
@@ -67,7 +67,7 @@ d <- subset(d, select = -c(col1)) #OR
 d <- d[-917,]
 
 # To drop observations with a given value:
-d <- subset(d, col3 %in% c("a","b"))
+# d <- subset(d, col3 %in% c("a","b"))
 
 # To Select an observation
 newdata <- d[ which(d$col3=='a' | d$col3 == 'b'), ]
