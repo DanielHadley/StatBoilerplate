@@ -115,6 +115,13 @@ library(ggplot2)
 library(scales) # for changing from scientific notation
 # Example scale feature: scale_y_continuous(labels = comma) or scale_y_continuous(labels = dollar)
 
+lime_green = "#2ecc71"
+soft_blue = "#3498db"
+pinkish_red = "#e74c3c"
+purple = "#9b59b6"
+teele = "#1abc9c"
+nice_blue = "#2980b9"
+
 
 my.theme <- 
   theme(plot.background = element_blank(), # Remove background
