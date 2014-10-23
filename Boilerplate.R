@@ -172,7 +172,7 @@ SHmap + geom_point(
 
 # More traditional heat map
 Somerville = c(lon = -71.1000, lat =  42.3875)
-somerville.map = get_map(location = Somerville, zoom = 14, color = "bw")
+somerville.map = get_map(location = Somerville, zoom = 14, maptype="roadmap",color = "bw")
 ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% locs2 + aes(x = locs2$lon, y = locs2$lat) +
   # geom_density2d(data = locs2, aes(x = lon, y = lat)) + # uncomment for contour lines
   stat_density2d(data = locs2, aes(x = lon, y = lat,  fill = ..level.., alpha = ..level..),
