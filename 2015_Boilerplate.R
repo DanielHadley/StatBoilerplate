@@ -207,7 +207,10 @@ d$FullAddress <- paste(d$Address, "Somerville", "MA", sep=", ")
 
 # Geocodes using the Google engine
 locs <- geocode(d$FullAddress)
-d <- bind_cols(d, locs) # Add the lat and long back to d
+#d <- bind_cols(d, locs) # Add the lat and long back to d
+# ^ Didn't work, so
+d$lon <- locs$lon
+d$lat <- locs$lat
 
 # Optional: delete ones that were not geocoded properly
 # I do this because when Google can't find something, it usually puts it int the center of the map
@@ -235,16 +238,16 @@ ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% d + aes(x = d$lon, y
 
 
 # A for loop that will create a dot map for every neighborhood you specify
-
-neighborhoodList <- c("Union Square", "Davis Square", "Ball Squre", "Teele Square")
+neighborhoodList <- c("Assembly Square", "Ball Square", "City Hall", "Davis Square", "East Somerville", "Gilman Square", "Magoun Square", "Porter Square", "Prospect Hill", "Spring Hill", "Teele Square", "Ten Hills", "Union Square", "Winter Hill")
 
 for (n in 1:(length(neighborhoodList))) {
-  map.center <- geocode(paste(neighborhoodList[n], "Somerville, MA", sep=", "))
-  SHmap <- qmap(c(lon=map.center$lon, lat=map.center$lat), source="google", zoom = 16)
-  SHmap + geom_point(
-    aes(x=d$lon, y=d$lat),size = 4, alpha = .7, bins = 26, color="red", 
-    data = d) +
-    ggtitle(paste("Data About", neighborhoodList[n], sep=" "))
+  map <- get_map(location = paste(neighborhoodList[n], "Somerville, MA", sep=", "), zoom=16, maptype="roadmap", color = "bw")
+  ggmap(map) +
+    geom_point(data=d,size=4,
+              aes(x=lon,y=lat,color=as.factor(Year)))+
+    labs(x="",y="") +
+    theme(axis.text=element_blank(),axis.ticks=element_blank()) +
+    ggtitle(neighborhoodList[n])
   
   ggsave(paste("./plots/map_",neighborhoodList[n], ".png", sep=""), dpi=250, width=6, height=5)
   
