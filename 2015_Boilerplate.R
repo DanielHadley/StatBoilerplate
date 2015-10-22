@@ -85,6 +85,7 @@ d$Season <- ifelse((d$Month >= 3) & (d$Month <= 5), "Spring",
 
 
 # Often you want to see your data arranged
+# In the newest version of RStudio, you can also do this with the GUI
 arrange(d, Date) # Ascending
 arrange(d, desc(Date)) #Descending
 d <- arrange(d, desc(Date)) # Do it to the dataframe
@@ -234,11 +235,14 @@ ggmap(somerville.map, extent = "panel", maprange=FALSE) %+% d + aes(x = d$lon, y
                  size = 0.01, bins = 16, geom = 'polygon') +
   scale_fill_gradient(low = "green", high = "red") +
   scale_alpha(range = c(0.00, 0.25), guide = FALSE) +
-  theme(legend.position = "none", axis.title = element_blank(), text = element_text(size = 12))
+  theme(legend.position = "none", axis.title = element_blank(), 
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        text = element_text(size = 12))
 
 
 # A for loop that will create a dot map for every neighborhood you specify
-neighborhoodList <- c("Assembly Square", "Ball Square", "City Hall", "Davis Square", "East Somerville", "Gilman Square", "Magoun Square", "Porter Square", "Prospect Hill", "Spring Hill", "Teele Square", "Ten Hills", "Union Square", "Winter Hill")
+neighborhoodList <- c("Assembly Square", "Ball Square", "Davis Square", "East Somerville", "Gilman Square", "Magoun Square", "Porter Square", "Prospect Hill", "Spring Hill", "Teele Square", "Ten Hills", "Union Square", "Winter Hill")
 
 for (n in 1:(length(neighborhoodList))) {
   map <- get_map(location = paste(neighborhoodList[n], "Somerville, MA", sep=", "), zoom=16, maptype="roadmap", color = "bw")
