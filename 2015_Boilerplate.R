@@ -14,7 +14,12 @@ library(ggmap) # making maps, duh
 library(lubridate) # dealing with dates
 
 # Set working director - this is where you will save plots and other files
+# For local drives, that will look something like this:
 setwd("C:/Users/dhadley/Documents/GitHub/StatBoilerplate")
+
+# For network drives, e.g. the 'K' drive, use the fileshare references
+setwd("//fileshare1/Departments2/Somerstat Data/SomerStat_Reference_Books/StatBoilerplate")
+
 
 
 #### Loading Data  #### 
